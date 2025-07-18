@@ -22,4 +22,18 @@ router.get('/type/:type', async (req, res) => {
   }
 });
 
+// GET single vehicle by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+    res.json(vehicle);
+  } catch (err) {
+    console.error('Error fetching vehicle:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

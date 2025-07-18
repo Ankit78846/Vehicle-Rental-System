@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UsersDataComponent from "./DashboardComponent/UsersDataComponent.jsx";
 import VehicleDataComponent from './DashboardComponent/VehicleDataComponent.jsx';
 import AddVehicleForm from '../renter/AddVehicleForm.jsx';
@@ -66,6 +67,14 @@ const AddVehicle = () => (
 );
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('adminLoggedIn');
+    if (!isAdmin) {
+      navigate('/admin-login');
+    }
+  }, [navigate]);
+
   const [selectedMenu, setSelectedMenu] = useState('vehicles');
 
 

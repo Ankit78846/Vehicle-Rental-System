@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Vehicle = require('../models/Vehicle');
 const authMiddleware = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { isAdmin } = require('../middleware/auth');
+const { vehicleUpload } = require('../middleware/upload');
 
-router.post('/add-vehicle', authMiddleware, upload.single('vehicleImage'), async (req, res) => {
+router.post('/add-vehicle', authMiddleware, isAdmin, vehicleUpload.single('vehicleImage'), async (req, res) => {
   try {
-    const { name, type, brand, price, location, features,description } = req.body;
+    const { name, type, brand, price, location, features, description, seats, fuelType, mileage, transmission } = req.body;
     const image = req.file ? req.file.filename : null;
 
     if (!image) {
@@ -19,6 +20,10 @@ router.post('/add-vehicle', authMiddleware, upload.single('vehicleImage'), async
       brand,
       price: parseFloat(price),
       location,
+      seats: parseInt(seats),
+      fuelType,
+      mileage: parseFloat(mileage),
+      transmission,
       features: JSON.parse(features),
       image,
       description,

@@ -1,9 +1,18 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
+const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'uploads/profiles/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const vehicleStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/vehicles/');
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -19,10 +28,16 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+const profileUpload = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter,
 });
 
-module.exports = upload;
+const vehicleUpload = multer({
+  storage: vehicleStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter,
+});
+
+module.exports = { profileUpload, vehicleUpload };

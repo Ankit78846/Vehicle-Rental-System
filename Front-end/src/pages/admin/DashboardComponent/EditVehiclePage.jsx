@@ -8,6 +8,10 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
     brand: "",
     price: "",
     location: "",
+    seats: "",
+    fuelType: "",
+    mileage: "",
+    transmission: "",
     description: "",
     features: {
       Safety: [],
@@ -22,12 +26,18 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
 
   useEffect(() => {
     if (initialData) {
+      console.log("Initial vehicle data:", initialData);
+      console.log("Vehicle image field:", initialData.image);
       setFormData({
         name: initialData.name || "",
         type: initialData.type || "",
         brand: initialData.brand || "",
         price: initialData.price || "",
         location: initialData.location || "",
+        seats: initialData.seats || "",
+        fuelType: initialData.fuelType || "",
+        mileage: initialData.mileage || "",
+        transmission: initialData.transmission || "",
         description: initialData.description || "",
         features: initialData.features || {
           Safety: [],
@@ -36,8 +46,17 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
         },
       });
 
-      if (initialData.vehicleImage) {
-        setImagePreview(`http://localhost:3001/${initialData.vehicleImage}`);
+      if (initialData.image) {
+        let imageUrl;
+        if (initialData.image.startsWith('http')) {
+          imageUrl = initialData.image;
+        } else if (initialData.image.startsWith('uploads/')) {
+          imageUrl = `http://localhost:3001/${initialData.image}`;
+        } else {
+          imageUrl = `http://localhost:3001/uploads/vehicles/${initialData.image}`;
+        }
+        console.log("Setting image preview to:", imageUrl); // Debug log
+        setImagePreview(imageUrl);
       }
     }
   }, [initialData]);
@@ -59,9 +78,18 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
 
     if (!formData.location.trim()) newErrors.location = "Location is required.";
 
+    if (!formData.seats || parseInt(formData.seats) < 1) newErrors.seats = "Seats must be at least 1.";
+
+    if (!formData.fuelType.trim()) newErrors.fuelType = "Fuel type is required.";
+
+    if (!formData.mileage || parseFloat(formData.mileage) <= 0) newErrors.mileage = "Mileage must be positive.";
+
+    if (!formData.transmission.trim()) newErrors.transmission = "Transmission type is required.";
+
+    // Image validation only for add mode (when initialData is null)
     if (!initialData && !image) {
       newErrors.image = "Image is required.";
-    } else if (image) {
+    } else if (!initialData && image) {
       const allowed = ['image/jpeg', 'image/png', 'image/jpg'];
       if (!allowed.includes(image.type)) {
         newErrors.image = "Invalid image type.";
@@ -85,14 +113,11 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
+    
+    // Create preview for new uploads
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
@@ -149,6 +174,8 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
         const updateData = {
           ...formData,
           _id: initialData._id,
+          seats: parseInt(formData.seats),
+          mileage: parseFloat(formData.mileage),
         };
 
         const res = await fetch("http://localhost:3001/api/update-vehicle", {
@@ -163,20 +190,6 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Update failed");
 
-        if (image) {
-          const imageFormData = new FormData();
-          imageFormData.append("vehicleImage", image);
-          imageFormData.append("vehicleId", initialData._id);
-
-          const imageRes = await fetch("http://localhost:3001/api/update-vehicle-image", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: imageFormData,
-          });
-
-          if (!imageRes.ok) throw new Error("Failed to update image");
-        }
-
         toast.success("Vehicle updated successfully");
         onSubmit(updateData);
       } else {
@@ -187,6 +200,10 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
         submission.append("brand", formData.brand);
         submission.append("price", formData.price);
         submission.append("location", formData.location);
+        submission.append("seats", formData.seats);
+        submission.append("fuelType", formData.fuelType);
+        submission.append("mileage", formData.mileage);
+        submission.append("transmission", formData.transmission);
         submission.append("description", formData.description);
         submission.append("features", JSON.stringify(formData.features));
         submission.append("vehicleImage", image);
@@ -207,12 +224,18 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
 
         if (res.ok) {
           toast.success("Vehicle added successfully");
+          
+          // Reset form data
           setFormData({
             name: "",
             type: "",
             brand: "",
             price: "",
             location: "",
+            seats: "",
+            fuelType: "",
+            mileage: "",
+            transmission: "",
             description: "",
             features: {
               Safety: [],
@@ -220,10 +243,15 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
               "Additional features": [],
             },
           });
-          setImage(null);
-          setImagePreview(null);
+          setImage();
+          setImagePreview();
           const fileInput = document.getElementById("vehicleImage");
           if (fileInput) fileInput.value = "";
+          
+          // Call onSubmit callback if provided
+          if (onSubmit) {
+            onSubmit(data);
+          }
         } else {
           toast.error("Error: " + data.message);
         }
@@ -240,9 +268,11 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
     <div className="bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg w-full overflow-y-auto">
         <div className="px-6 py-2">
-          <Toaster />
+          {/* <Toaster /> */}
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">{initialData ? "Edit Vehicle" : "Add Vehicle"}</h2>
+            <h2 className="text-2xl font-bold">
+              {initialData ? "Edit Vehicle Details" : "Add Vehicle"}
+            </h2>
             {onCancel && (
               <button
                 onClick={onCancel}
@@ -253,26 +283,143 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
             )}
           </div>
 
+          {/* Current Vehicle Info Display */}
+          {initialData && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Editing Vehicle</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Name:</span>
+                  <p className="text-gray-800">{initialData.name}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Type:</span>
+                  <p className="text-gray-800">{initialData.type}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Brand:</span>
+                  <p className="text-gray-800">{initialData.brand}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Price:</span>
+                  <p className="text-gray-800">Rs. {initialData.price}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-6">
+            {/* Basic Vehicle Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {["name", "type", "brand", "price", "location"].map((field) => (
                 <div key={field}>
-                  <input
-                    type={field === "price" ? "number" : "text"}
-                    name={field}
-                    placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                    value={formData[field]}
-                    onChange={handleChange}
-                    className="border p-2 rounded w-full"
-                    step={field === "price" ? "1" : undefined}
-                    min={field === "price" ? "0" : undefined}
-                  />
+                  {field === "type" ? (
+                    <select
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    >
+                      <option value="">Select Vehicle Type</option>
+                      <option value="two-wheeler">Two-Wheeler</option>
+                      <option value="car">Car</option>
+                      <option value="truck">Truck</option>
+                      <option value="pickup">Pickup</option>
+                      <option value="bus">Bus</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={field === "price" ? "number" : "text"}
+                      name={field}
+                      placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      className="border p-2 rounded w-full"
+                      step={field === "price" ? "1" : undefined}
+                      min={field === "price" ? "0" : undefined}
+                    />
+                  )}
                   {errors[field] && (
                     <p className="text-red-500 text-sm">{errors[field]}</p>
                   )}
                 </div>
               ))}
-              <div className="md:col-span-2">
+            </div>
+
+            {/* Vehicle Specifications */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <input
+                  type="number"
+                  name="seats"
+                  placeholder="Number of Seats"
+                  value={formData.seats}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  min="1"
+                  max="50"
+                />
+                {errors.seats && (
+                  <p className="text-red-500 text-sm">{errors.seats}</p>
+                )}
+              </div>
+              
+              <div>
+                <select
+                  name="fuelType"
+                  value={formData.fuelType}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  required
+                >
+                  <option value="">Select Fuel Type</option>
+                  <option value="Gas">Gas</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+                {errors.fuelType && (
+                  <p className="text-red-500 text-sm">{errors.fuelType}</p>
+                )}
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  name="mileage"
+                  placeholder="Mileage (MPG)"
+                  value={formData.mileage}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  min="1"
+                  step="0.1"
+                />
+                {errors.mileage && (
+                  <p className="text-red-500 text-sm">{errors.mileage}</p>
+                )}
+              </div>
+
+              <div>
+                <select
+                  name="transmission"
+                  value={formData.transmission}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  required
+                >
+                  <option value="">Select Transmission</option>
+                  <option value="Automatic">Automatic</option>
+                  <option value="Manual">Manual</option>
+                </select>
+                {errors.transmission && (
+                  <p className="text-red-500 text-sm">{errors.transmission}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="grid grid-cols-1 gap-6">
+              <div>
                 <textarea
                   name="description"
                   placeholder="Description"
@@ -283,42 +430,85 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
               </div>
             </div>
 
-            {/* Image Section */}
+            {/* Image Section - Upload for Add, Preview Only for Edit */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Vehicle Image Preview
-                </label>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden w-48 h-36 flex items-center justify-center bg-gray-50">
-                    {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Vehicle preview"
-                        className="object-contain w-full h-full"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-sm">No image selected</span>
+              {!initialData ? (
+                // Add Vehicle Mode - Show Upload Input and Preview
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vehicle Image *
+                    </label>
+                    <input
+                      type="file"
+                      id="vehicleImage"
+                      name="vehicleImage"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                    {errors.image && (
+                      <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                    )}
+                    {image && (
+                      <p className="text-green-600 text-sm mt-1">
+                        Selected: {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
                     )}
                   </div>
-                  <input
-                    type="file"
-                    id="vehicleImage"
-                    name="vehicleImage"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="border p-2 rounded w-full mt-2"
-                  />
-                  {errors.image && (
-                    <p className="text-red-500 text-sm">{errors.image}</p>
-                  )}
-                  {image && (
-                    <p className="text-green-600 text-sm mt-1">
-                      Selected: {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Image Preview
+                    </label>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden w-48 h-36 flex items-center justify-center bg-gray-50">
+                        {imagePreview ? (
+                          <img
+                            src={imagePreview}
+                            alt="Vehicle preview"
+                            className="object-contain w-full h-full"
+                          />
+                        ) : (
+                          <span className="text-gray-400 text-sm">No image selected</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Edit Vehicle Mode - Show Preview Only
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Vehicle Image
+                  </label>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden w-48 h-36 flex items-center justify-center bg-gray-50">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Vehicle preview"
+                          className="object-contain w-full h-full"
+                          onError={(e) => {
+                            console.error("Failed to load image:", imagePreview);
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                          onLoad={() => {
+                            console.log("Image loaded successfully:", imagePreview);
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-sm">No image available</span>
+                      )}
+                      <span className="text-red-400 text-sm hidden">Failed to load image</span>
+                    </div>
+                    <p className="text-sm text-gray-600 text-center">
+                      Image updates are not available in edit mode
                     </p>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Features Section */}

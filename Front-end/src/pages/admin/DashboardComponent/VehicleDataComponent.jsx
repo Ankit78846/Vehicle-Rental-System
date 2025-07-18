@@ -85,12 +85,14 @@ export default function VehicleDataComponent() {
     } catch (err) {
       toast.error(err.response?.data?.message || "Error deleting vehicle");
     } finally {
+      setShowDropdown(null);
       setShowDeletePopover(null);
       setVehicleToDelete(null);
     }
   };
 
   const handleDeleteCancel = () => {
+    setShowDropdown(null);
     setShowDeletePopover(null);
     setVehicleToDelete(null);
   };
@@ -128,9 +130,9 @@ export default function VehicleDataComponent() {
                     <BsThreeDotsVertical className="text-gray-600" />
                   </button>
                   {showDropdown === index && (
-                    <div className="absolute right-0 top-8 w-50 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                    <div className="absolute right-19 top-2 w-60 border bg-white border-gray-200 rounded-lg shadow-lg z-20">
                       {showDeletePopover === index ? (
-                        <div className="p-4">
+                        <div className="p-4 w-fit">
                           <h2 className="text-base font-bold mb-2 text-center">Confirm Deletion</h2>
                           <p className="mb-4 text-center text-xs">Are you sure you want to delete <span className="font-semibold">{vehicleToDelete?.name}</span>? This action cannot be undone.</p>
                           <div className="flex justify-center gap-2">

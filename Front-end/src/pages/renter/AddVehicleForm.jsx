@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
-export default function AddVehicle() {
+export default function AddVehicle({ onSubmit }) {
   
   const [formData, setFormData] = useState({
     name: "",
@@ -9,6 +9,10 @@ export default function AddVehicle() {
     brand: "",
     price: "",
     location: "",
+    seats: "",
+    fuelType: "",
+    mileage: "",
+    transmission: "",
     description: "",
     features: {
       Safety: [],
@@ -17,8 +21,18 @@ export default function AddVehicle() {
     },
   });
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  // Cleanup effect to revoke object URLs
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   // Auth check
 
@@ -38,6 +52,14 @@ export default function AddVehicle() {
     if (!formData.price || parseFloat(formData.price) <= 1) newErrors.price = "Price must be positive.";
 
     if (!formData.location.trim()) newErrors.location = "Location is required.";
+
+    if (!formData.seats || parseInt(formData.seats) < 1) newErrors.seats = "Seats must be at least 1.";
+
+    if (!formData.fuelType.trim()) newErrors.fuelType = "Fuel type is required.";
+
+    if (!formData.mileage || parseFloat(formData.mileage) <= 0) newErrors.mileage = "Mileage must be positive.";
+
+    if (!formData.transmission.trim()) newErrors.transmission = "Transmission type is required.";
 
     if (!image) {
       newErrors.image = "Image is required.";
@@ -65,6 +87,35 @@ export default function AddVehicle() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
+    
+    // Create preview URL
+    if (file) {
+      // Clean up previous preview URL
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImage(null);
+    setImagePreview(null);
+    const fileInput = document.getElementById("vehicleImage");
+    if (fileInput) fileInput.value = "";
+    // Clear any image-related errors
+    if (errors.image) {
+      setErrors(prev => ({
+        ...prev,
+        image: undefined
+      }));
+    }
   };
 
   const handleFeatureChange = (category, index, value) => {
@@ -121,6 +172,10 @@ export default function AddVehicle() {
       submission.append("brand", formData.brand);
       submission.append("price", formData.price);
       submission.append("location", formData.location);
+      submission.append("seats", formData.seats);
+      submission.append("fuelType", formData.fuelType);
+      submission.append("mileage", formData.mileage);
+      submission.append("transmission", formData.transmission);
       submission.append("description", formData.description);
       submission.append("features", JSON.stringify(formData.features));
       submission.append("vehicleImage", image);
@@ -137,12 +192,18 @@ export default function AddVehicle() {
       const data = await res.json();
       if (res.ok) {
         toast.success("Vehicle added successfully");
+        
+        // Reset form data
         setFormData({
           name: "",
           type: "",
           brand: "",
           price: "",
           location: "",
+          seats: "",
+          fuelType: "",
+          mileage: "",
+          transmission: "",
           description: "",
           features: {
             Safety: [],
@@ -150,10 +211,22 @@ export default function AddVehicle() {
             "Additional features": [],
           },
         });
+        
+        // Clean up image and preview
+        if (imagePreview) {
+          URL.revokeObjectURL(imagePreview);
+        }
         setImage(null);
+        setImagePreview(null);
         setErrors({});
+        
         const fileInput = document.getElementById("vehicleImage");
         if (fileInput) fileInput.value = "";
+        
+        // Call onSubmit callback if provided
+        if (onSubmit) {
+          onSubmit(data);
+        }
       } else {
         toast.error("Error: " + data.message);
       }
@@ -170,26 +243,120 @@ export default function AddVehicle() {
       <Toaster />
       <h2 className="text-2xl font-bold mb-4">Add Vehicle</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Vehicle Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {["name", "type", "brand", "price", "location"].map((field) => (
             <div key={field}>
-              <input
-                type={field === "price" ? "number" : "text"}
-                name={field}
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                value={formData[field]}
-                onChange={handleChange}
-                className="border p-2 rounded w-full"
-                required
-                step={field === "price" ? "1" : undefined}
-                min={field === "price" ? "0" : undefined}
-              />
+              {field === "type" ? (
+                <select
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  required
+                >
+                  <option value="">Select Vehicle Type</option>
+                  <option value="two-wheeler">Two Wheeler</option>
+                  <option value="car">Car</option>
+                  <option value="truck">Truck</option>
+                  <option value="pickup">Pickup</option>
+                  <option value="bus">Bus</option>
+                </select>
+              ) : (
+                <input
+                  type={field === "price" ? "number" : "text"}
+                  name={field}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  className="border p-2 rounded w-full"
+                  required
+                  step={field === "price" ? "1" : undefined}
+                  min={field === "price" ? "0" : undefined}
+                />
+              )}
               {errors[field] && (
                 <p className="text-red-500 text-sm">{errors[field]}</p>
               )}
             </div>
           ))}
-          <div className="md:col-span-2">
+        </div>
+
+        {/* Vehicle Specifications */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <input
+              type="number"
+              name="seats"
+              placeholder="Number of Seats"
+              value={formData.seats}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+              required
+              min="1"
+              max="50"
+            />
+            {errors.seats && (
+              <p className="text-red-500 text-sm">{errors.seats}</p>
+            )}
+          </div>
+          
+          <div>
+            <select
+              name="fuelType"
+              value={formData.fuelType}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+              required
+            >
+              <option value="">Select Fuel Type</option>
+              <option value="Gas">Gas</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+            {errors.fuelType && (
+              <p className="text-red-500 text-sm">{errors.fuelType}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="number"
+              name="mileage"
+              placeholder="Mileage (MPG)"
+              value={formData.mileage}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+              required
+              min="1"
+              step="0.1"
+            />
+            {errors.mileage && (
+              <p className="text-red-500 text-sm">{errors.mileage}</p>
+            )}
+          </div>
+
+          <div>
+            <select
+              name="transmission"
+              value={formData.transmission}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+              required
+            >
+              <option value="">Select Transmission</option>
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+            </select>
+            {errors.transmission && (
+              <p className="text-red-500 text-sm">{errors.transmission}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="grid grid-cols-1 gap-6">
+          <div>
             <textarea
               name="description"
               placeholder="Description"
@@ -201,6 +368,10 @@ export default function AddVehicle() {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Vehicle Image *
+          </label>
+          
           <input
             type="file"
             id="vehicleImage"
@@ -210,13 +381,58 @@ export default function AddVehicle() {
             className="border p-2 rounded w-full"
             required
           />
+          
           {errors.image && (
-            <p className="text-red-500 text-sm">{errors.image}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.image}</p>
           )}
+          
           {image && (
             <p className="text-green-600 text-sm mt-1">
               Selected: {image.name} ({(image.size / 1024 / 1024).toFixed(2)} MB)
             </p>
+          )}
+          
+          {/* Image Preview Section */}
+          {imagePreview && (
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-sm font-medium text-gray-700">Preview:</h4>
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Remove
+                </button>
+              </div>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 relative">
+                <img
+                  src={imagePreview}
+                  alt="Vehicle preview"
+                  className="max-w-full h-48 object-cover rounded-lg mx-auto shadow-md"
+                />
+                <p className="text-center text-sm text-gray-500 mt-2">
+                  Vehicle image preview
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {/* Upload Instructions */}
+          {!imagePreview && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-blue-700">
+                  Upload a clear, high-quality image of your vehicle. Supported formats: JPG, PNG. Max size: 5MB.
+                </p>
+              </div>
+            </div>
           )}
         </div>
 

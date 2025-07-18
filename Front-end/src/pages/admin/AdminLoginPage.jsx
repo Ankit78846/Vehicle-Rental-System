@@ -9,21 +9,35 @@ export default function AdminLoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3001/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    
+    // Validate fields
+    if (!username || !password) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
-    const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("adminName","houlers");
+    try {
+      const res = await fetch("http://localhost:3001/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      navigate("/dashboard"); // ✅ Redirect to admin panel after login
-    } else {
-      toast.error(data.message); // Show error message using toast
+      const data = await res.json();
+      
+      if (res.ok) {
+        localStorage.setItem("adminLoggedIn", "true");
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminName","houlers");
+        
+        toast.success("Login successful! Redirecting...");
+        setTimeout(() => navigate("/dashboard"), 1500); // Add delay for better UX
+      } else {
+        toast.error(data.message || "Login failed. Please try again."); 
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      toast.error("Cannot connect to server. Please check your connection.");
     }
   };
 
@@ -41,7 +55,6 @@ export default function AdminLoginPage() {
 
   return (
   <>
-  <Toaster/>
     <div className="flex flex-col items-center justify-center  mt-20">
       <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
       <form onSubmit={handleLogin} className="flex flex-col gap-4 w-[300px]">

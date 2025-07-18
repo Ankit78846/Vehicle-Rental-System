@@ -13,11 +13,35 @@ export default function Navbar() {
 
     useEffect(() => {
         const stored = localStorage.getItem("profileImg");
-        if (stored) {
+        if (stored && stored.trim() !== "") {
             setImgUrl(stored);
         } else {
             setImgUrl(defaultProfile);
         }
+    }, []);
+
+    // Listen for profile image updates
+    useEffect(() => {
+        const handleProfileUpdate = () => {
+            const stored = localStorage.getItem("profileImg");
+            console.log('Profile image updated, new URL:', stored); // Debug log
+            if (stored && stored.trim() !== "") {
+                setImgUrl(stored);
+            } else {
+                setImgUrl(defaultProfile);
+            }
+        };
+
+        // Listen for custom profile update event
+        window.addEventListener('profileImageUpdated', handleProfileUpdate);
+        
+        // Also listen for storage changes (if opened in multiple tabs)
+        window.addEventListener('storage', handleProfileUpdate);
+
+        return () => {
+            window.removeEventListener('profileImageUpdated', handleProfileUpdate);
+            window.removeEventListener('storage', handleProfileUpdate);
+        };
     }, []);
 
     useEffect(() => {

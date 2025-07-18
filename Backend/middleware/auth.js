@@ -30,4 +30,13 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+// Middleware to restrict access to admin only
+const isAdmin = (req, res, next) => {
+  if (!req.admin) {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  next();
+};
+
 module.exports = authMiddleware;
+module.exports.isAdmin = isAdmin;

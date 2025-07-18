@@ -21,7 +21,7 @@ const VehicleCard = ({ vehicle, type }) => {
         <div className="relative">
           <img
             className="w-full h-48 sm:h-52 object-cover object-center transition-transform duration-300 group-hover:scale-105"
-            src={`http://localhost:3001/uploads/${vehicle.image}`}
+            src={`http://localhost:3001/uploads/vehicles/${vehicle.image}`}
             alt={vehicle.name}
           />
           <button

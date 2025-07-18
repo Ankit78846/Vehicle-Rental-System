@@ -34,6 +34,28 @@ const vehicleSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Location is required'],
   },
+  // Vehicle specifications
+  seats: {
+    type: Number,
+    required: [true, 'Number of seats is required'],
+    min: [1, 'Seats must be at least 1'],
+    max: [50, 'Seats cannot exceed 50'],
+  },
+  fuelType: {
+    type: String,
+    required: [true, 'Fuel type is required'],
+    enum: ['Gas', 'Electric', 'Hybrid'],
+  },
+  mileage: {
+    type: Number,
+    required: [true, 'Mileage is required'],
+    min: [1, 'Mileage must be positive'],
+  },
+  transmission: {
+    type: String,
+    required: [true, 'Transmission type is required'],
+    enum: ['Automatic', 'Manual'],
+  },
   features: {
     Safety: [String],
     'Device connectivity': [String],

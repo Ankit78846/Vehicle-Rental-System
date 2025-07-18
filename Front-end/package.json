@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.10.0",
+    "crypto-js": "^4.2.0",
     "firebase": "^11.9.1",
     "framer-motion": "^12.23.3",
     "js-cookie": "^3.0.5",
