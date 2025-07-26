@@ -42,10 +42,7 @@ const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/easywheels";
 
 mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MONGODB_URI)
   .then(() => {
     console.log("✅ Connected to MongoDB Atlas");
     console.log(`📊 Database: ${mongoose.connection.db.databaseName}`);
@@ -339,6 +336,10 @@ app.use("/api", updateVehicle);
 const fetchVehicle = require("./routes/fetchvehicle");
 app.use("/api/vehicles", fetchVehicle);
 
+// Content-based filtering and recommendations
+const contentFilterRoutes = require("./routes/content-filter");
+app.use("/api/content", contentFilterRoutes);
+
 // Public routes for click tracking (no authentication required)
 app.use("/api/public", addVehicle);
 
@@ -348,6 +349,14 @@ app.use("/api/fetch/users", fetchUsers);
 // Favorites routes
 const favoritesRoutes = require("./routes/favorites");
 app.use("/api/favorites", favoritesRoutes);
+
+// Payment routes
+const paymentRoutes = require("./routes/payment");
+app.use("/api/payment", paymentRoutes);
+
+// Booking routes
+const bookingRoutes = require("./routes/bookings");
+app.use("/api/bookings", bookingRoutes);
 
 // Contact form endpoint
 app.post('/api/contact', async (req, res) => {

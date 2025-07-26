@@ -1,10 +1,8 @@
 import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { FaWhatsapp } from "react-icons/fa6";
 import { useState } from "react";
-import { getApiUrl } from "../config/api";
-import BackButton from "../components/BackButton";
-// import Navbar from "../components/Navbar";
-// import Footer from "../components/Footer";
+import { getApiUrl } from "../../config/api";
+
 
 const ContactUs = () => {
 	const [formData, setFormData] = useState({
@@ -152,108 +150,106 @@ const ContactUs = () => {
 	return (
 		<>
 			{/* <div className="bg-white min-h-screen"> */}
-			<div className=" w-full flex flex-col justify-center items-center " id="contactus-section"
-			>
-			{/* Back Button */}
-			<div className="w-[80vw] pt-4">
-				<BackButton />
-			</div>
+			<div className="w-full flex flex-col justify-center items-center" id="contactus-section">
 			
-			<div className="w-[80vw] rounded-t-lg shadow-xl md:flex-row bg-blue-700 text-white py-10 px-4 md:px-10 mt-20 text-center md:text-left relative max-w-screen-2xl mx-auto" >			
-				<div className="flex flex-col ml-10 items-center md:items-start w-full md:w-1/2">
-					<h1 className="text-3xl md:text-4xl font-bold">Contact us</h1>
-					<p className="text-base md:text-lg mt-2">Ask your queries with us for free.</p>
+
+
+			<div className="w-[95vw] md:w-[85vw] rounded-t-lg shadow-xl bg-blue-700 text-white py-8 md:py-10 px-4 md:px-10 mt-6 md:mt-10 text-center md:text-left relative max-w-screen-2xl mx-auto">			
+				<div className="flex flex-col items-center md:items-start w-full md:w-1/2 md:ml-10">
+					<h1 className="text-2xl md:text-4xl font-bold">Contact us</h1>
+					<p className="text-sm md:text-lg mt-2">Ask your queries with us for free.</p>
 				</div>
 
 		</div >
 
-			<div className="w-[80vw] flex flex-col md:flex-row justify-center px-4 md:px-20 py-10 space-y-10 md:space-y-0 md:space-x-10 bg-gray-50">
-				<div className="bg-indigo-50 p-6 rounded-lg shadow-md w-full md:w-1/3">
-					<h2 className="text-xl font-semibold text-indigo-900 mb-4">Contact Details</h2>
-					<p className="mb-4 text-sm text-indigo-900">
+			<div className="w-[95vw] md:w-[85vw] flex flex-col md:flex-row justify-center px-4 md:px-20 py-6 md:py-10 space-y-6 md:space-y-0 md:space-x-10 bg-gray-50 max-w-screen-2xl mx-auto">
+				<div className="bg-indigo-50 p-4 md:p-6 rounded-lg shadow-md w-full md:w-1/3">
+					<h2 className="text-lg md:text-xl font-semibold text-indigo-900 mb-3 md:mb-4">Contact Details</h2>
+					<p className="mb-3 md:mb-4 text-xs md:text-sm text-indigo-900">
 						We're here for you. We'll get to you as soon as possible.
 					</p>
-					<div className="space-y-4 text-gray-800 text-sm">
+					<div className="space-y-3 md:space-y-4 text-gray-800 text-xs md:text-sm">
 						<div className="flex items-start">
-							<FaMapMarkerAlt className="text-[#fe1900] mt-1" />
-							<span className="ml-3">Butwal, Rupandehi, Nepal</span>
+							<FaMapMarkerAlt className="text-[#fe1900] mt-1 flex-shrink-0" />
+							<span className="ml-2 md:ml-3">Butwal, Rupandehi, Nepal</span>
 						</div>
 						<div className="flex items-start">
-							<FaPhoneAlt className="text-[#2bc055] mt-1" />
-							<span className="ml-3">+977 71537999</span>
+							<FaPhoneAlt className="text-[#2bc055] mt-1 flex-shrink-0" />
+							<span className="ml-2 md:ml-3">+977 71537999</span>
 						</div>
 						<div className="flex items-start">
-							<FaWhatsapp className="text-[#2bc055] mt-1" />
-							<span className="ml-3">
-								+977 9806418493
+							<FaWhatsapp className="text-[#2bc055] mt-1 flex-shrink-0" />
+							<span className="ml-2 md:ml-3">
+								+977 9806418493<br />
+								+977 9804439499
 							</span>
 						</div>
 						<div className="flex items-start">
-							<FaEnvelope className="text-[#d11919] mt-1" />
-							<span className="ml-3">
-								info@easywheels.com.np<br />
-								pokharelutkrista@gmail.com
-								bhuwan626282@gmail.com
+							<FaEnvelope className="text-[#d11919] mt-1 flex-shrink-0" />
+							<span className="ml-2 md:ml-3 break-all">
+								utkrista@utkristapokharel.com.np<br />
+								bhuwan626282@gmail.com<br />
+								rokeypandey6@gmail.com
 							</span>
 						</div>
 					</div>
 				</div>
 
-				<div className="bg-[#f6f6f6]  md:w-2/3 p-6 border-0 rounded-lg shadow-md">
-					<h2 className="text-xl font-semibold mb-2">
+				<div className="bg-[#f6f6f6] w-full md:w-2/3 p-4 md:p-6 border-0 rounded-lg shadow-md">
+					<h2 className="text-lg md:text-xl font-semibold mb-2">
 						Get in Touch with EasyWheels!
 					</h2>
-					<p className="text-sm text-gray-600 mb-4">
+					<p className="text-xs md:text-sm text-gray-600 mb-4">
 						<strong>Note:</strong> <span className="text-red-500">*</span> symbol represents required
 					</p>
 
-					<form className="space-y-5" onSubmit={handleSubmit}>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<form className="space-y-4 md:space-y-5" onSubmit={handleSubmit}>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
 							<div>
-								<label className="text-sm">Name <span className="text-red-500">*</span></label>
+								<label className="text-xs md:text-sm">Name <span className="text-red-500">*</span></label>
 								<input 
 									type="text" 
 									name="name"
 									value={formData.name}
 									onChange={handleInputChange}
 									placeholder="Full Name" 
-									className={`w-full px-4 py-2 mt-1 border-0 rounded bg-white ${errors.name ? 'border-2 border-red-500' : ''}`} 
+									className={`w-full px-3 md:px-4 py-2 mt-1 border-0 rounded bg-white text-sm ${errors.name ? 'border-2 border-red-500' : ''}`} 
 								/>
 								{errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
 							</div>
 							<div>
-								<label className="text-sm">Email <span className="text-red-500">*</span></label>
+								<label className="text-xs md:text-sm">Email <span className="text-red-500">*</span></label>
 								<input 
 									type="email" 
 									name="email"
 									value={formData.email}
 									onChange={handleInputChange}
 									placeholder="Your Email" 
-									className={`w-full px-4 py-2 mt-1 border-0 rounded bg-white ${errors.email ? 'border-2 border-red-500' : ''}`} 
+									className={`w-full px-3 md:px-4 py-2 mt-1 border-0 rounded bg-white text-sm ${errors.email ? 'border-2 border-red-500' : ''}`} 
 								/>
 								{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
 							</div>
 							<div>
-								<label className="text-sm">Your Address <span className="text-red-500">*</span></label>
+								<label className="text-xs md:text-sm">Your Address <span className="text-red-500">*</span></label>
 								<input 
 									type="text" 
 									name="address"
 									value={formData.address}
 									onChange={handleInputChange}
 									placeholder="Address" 
-									className={`w-full px-4 py-2 mt-1 border-0 rounded bg-white ${errors.address ? 'border-2 border-red-500' : ''}`} 
+									className={`w-full px-3 md:px-4 py-2 mt-1 border-0 rounded bg-white text-sm ${errors.address ? 'border-2 border-red-500' : ''}`} 
 								/>
 								{errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
 							</div>
 							<div>
-								<label className="text-sm">Phone</label>
+								<label className="text-xs md:text-sm">Phone</label>
 								<div className="flex items-center">
-									<span className="px-3 py-2 border-0 bg-white text-gray-600 rounded-l">
+									<span className="px-2 md:px-3 py-2 border-0 bg-white text-gray-600 rounded-l">
 										<select 
 											name="country" 
 											value={formData.country}
 											onChange={handleInputChange}
-											className="outline-none bg-transparent"
+											className="outline-none bg-transparent text-xs md:text-sm"
 										>
 											<option value="Nepal">Nepal</option>
 											<option value="India">India</option>
@@ -265,20 +261,20 @@ const ContactUs = () => {
 										value={formData.phone}
 										onChange={handleInputChange}
 										placeholder="Your Phone" 
-										className={`w-full px-4 py-2 border-0 rounded-r bg-white ${errors.phone ? 'border-2 border-red-500' : ''}`} 
+										className={`w-full px-3 md:px-4 py-2 border-0 rounded-r bg-white text-sm ${errors.phone ? 'border-2 border-red-500' : ''}`} 
 									/>
 								</div>
 								{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
 							</div>
 						</div>
 						<div>
-							<label className="text-sm">Message <span className="text-red-500">*</span></label>
+							<label className="text-xs md:text-sm">Message <span className="text-red-500">*</span></label>
 							<textarea 
 								rows="4" 
 								name="message"
 								value={formData.message}
 								onChange={handleInputChange}
-								className={`w-full px-4 py-2 mt-1 border-0 rounded bg-white ${errors.message ? 'border-2 border-red-500' : ''}`} 
+								className={`w-full px-3 md:px-4 py-2 mt-1 border-0 rounded bg-white text-sm resize-none ${errors.message ? 'border-2 border-red-500' : ''}`} 
 								placeholder="Your Message" 
 							/>
 							{errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
@@ -286,11 +282,11 @@ const ContactUs = () => {
 						<button 
 							type="submit" 
 							disabled={isSubmitting}
-							className={`px-6 py-2 rounded text-white ${
+							className={`w-full md:w-auto px-6 py-2 md:py-3 rounded text-white text-sm md:text-base font-medium ${
 								isSubmitting 
 									? 'bg-gray-400 cursor-not-allowed' 
-									: 'bg-red-500 hover:bg-red-600'
-							}`}
+									: 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+							} transition-colors duration-200`}
 						>
 							{isSubmitting ? 'Submitting...' : 'Submit'}
 						</button>

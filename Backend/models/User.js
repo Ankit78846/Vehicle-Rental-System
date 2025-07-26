@@ -47,6 +47,23 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Vehicle'
   }],
+  role: {
+    type: String,
+    enum: ['user', 'host', 'admin'],
+    default: 'user'
+  },
+  isHost: {
+    type: Boolean,
+    default: false
+  },
+  hostSince: {
+    type: Date,
+    default: null
+  },
+  vehiclesOwned: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vehicle'
+  }],
   isActive: {
     type: Boolean,
     default: true,
@@ -83,8 +100,7 @@ userSchema.pre('save', function(next) {
   next();
 });
 
-// Create indexes
-userSchema.index({ email: 1 });
-userSchema.index({ googleId: 1 });
+// Note: Indexes for email and googleId are automatically created due to unique: true
+// in the schema definition, so no need for explicit index creation
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import Jeep from '../images/offroad.png';
-import SUV from '../images/jeep.png';
-import Sedan from '../images/suv.png';
-import Offroad from '../images/sedan.png';
+import Jeep from '../../images/offroad.png';
+import SUV from '../../images/jeep.png';
+import Sedan from '../../images/suv.png';
+import Offroad from '../../images/sedan.png';
 
 const vehicles = [Jeep, SUV, Sedan, Offroad];
 const texts = [
@@ -11,7 +11,7 @@ const texts = [
   'ENJOY LUXURY AND SAFETY',
 ];
 
-function LandingPage() {
+function HeroSection() {
   const [vehicleIndex, setVehicleIndex] = useState(0);
   const [textIndex, setTextIndex] = useState(0);
   const [vehicleSlide, setVehicleSlide] = useState(true);
@@ -92,4 +92,4 @@ function LandingPage() {
     );
   }
 
-  export default LandingPage;
+  export default HeroSection;

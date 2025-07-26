@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getApiUrl, getImageUrl } from "../config/api";
 
-const VehicleCard = ({ vehicle, type }) => {
+const VehicleCard = ({ vehicle, type, onVehicleClick }) => {
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -82,6 +82,11 @@ const VehicleCard = ({ vehicle, type }) => {
           'Content-Type': 'application/json',
         },
       });
+      
+      // Notify parent component about the click
+      if (onVehicleClick) {
+        onVehicleClick(vehicle._id);
+      }
     } catch (error) {
       console.error('Error tracking click:', error);
     }

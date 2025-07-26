@@ -184,50 +184,6 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
     }
   };
 
-  const handleToggleStatus = async () => {
-    if (!initialData) return; // Only for edit mode
-    
-    const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
-    if (!token) {
-      toast.error("Login required");
-      return;
-    }
-
-    const newStatus = !formData.isActive;
-    
-    try {
-      const res = await fetch(getApiUrl(`api/toggle-vehicle-status/${initialData._id}`), {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isActive: newStatus }),
-      });
-
-      const data = await res.json();
-      
-      if (res.ok) {
-        // Update local state
-        setFormData(prev => ({
-          ...prev,
-          isActive: newStatus
-        }));
-        
-        toast.success(data.message);
-        
-        if (onSubmit) {
-          onSubmit(data.vehicle);
-        }
-      } else {
-        throw new Error(data.message || "Failed to update status");
-      }
-    } catch (error) {
-      console.error("Error toggling status:", error);
-      toast.error("Error updating vehicle status: " + error.message);
-    }
-  };
-
   const handleFeatureChange = (category, index, value) => {
     const updated = [...formData.features[category]];
     updated[index] = value;
@@ -407,7 +363,7 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
 
   return (
     <div className="bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full overflow-y-auto">
+      <div className="bg-white rounded-lg w-full overflow-y-auto hide-scrollbar">
         <div className="px-6 py-2">
           <Toaster />
           <div className="flex justify-between items-center mb-4">
@@ -429,29 +385,6 @@ export default function EditVehicleForm({ initialData = null, onSubmit, onCancel
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold text-blue-800">Editing Vehicle</h3>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-600">Status:</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      formData.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {formData.isActive ? '✓ Active' : '✗ Inactive'}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleToggleStatus}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      formData.isActive
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-300'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
-                    }`}
-                  >
-                    {formData.isActive ? 'Deactivate' : 'Activate'}
-                  </button>
-                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>

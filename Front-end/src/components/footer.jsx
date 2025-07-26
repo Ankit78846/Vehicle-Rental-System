@@ -22,17 +22,19 @@ export default function Footer() {
 					<h3 className="text-lg font-semibold mb-2">Contact Info</h3>
 					<p className="text-gray-400 text-sm">Butwal, Rupandehi</p>
 					<p className="text-gray-400 text-sm">9806418493, 9804439499</p>
-					<p className="text-gray-400 text-sm">info@easywheels.com.np</p>
+					<p className="text-gray-400 text-sm">utkrista@utkristapokharel.com.np</p>
+					<p className="text-gray-400 text-sm">rokeypandey6@gmail.com</p>
+					<p className="text-gray-400 text-sm">bhuwan626282@gmail.com</p>
 				</div>
 
 				{/* Quick Links */}
 				<div className="flex-1 min-w-[200px]">
 					<h3 className="text-lg font-semibold mb-2">Quick Links</h3>
 					<ul className="text-gray-400 text-sm space-y-2">
-						<li><a href="#" className="hover:underline">About</a></li>
-						<li><a href="#" className="hover:underline">Vehicles</a></li>
-						<li><a href="#" className="hover:underline">Contact</a></li>
-						<li><a href="#" className="hover:underline">Become a host</a></li>
+						<li><a href="/about" className="hover:underline">About</a></li>
+						<li><a href="/vehicles" className="hover:underline">Vehicles</a></li>
+						<li><a href="/contact" className="hover:underline">Contact</a></li>
+						<li><a href="/add-vehicle" className="hover:underline">Become a host</a></li>
 					</ul>
 				</div>
 
@@ -48,7 +50,7 @@ export default function Footer() {
 							<img src={linkedin} alt="LinkedIn" className="w-6 h-6 mr-2 invert" />
 							LinkedIn
 						</a>
-						<a href="#" className="flex items-center hover:underline">
+						<a href="https://www.instagram.com/utkrista_pokharel?igsh=MTVmYzVoeXY2enZ3Zw%3D%3D&utm_source=qr" className="flex items-center hover:underline">
 							<img src={instagram} alt="Instagram" className="w-6 h-6 mr-2" />
 							Instagram
 						</a>

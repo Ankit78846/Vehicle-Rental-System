@@ -69,7 +69,7 @@ function UserDetailModal({ user, onClose, onUserUpdate }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+      <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto hide-scrollbar relative">
         <button onClick={onClose} className="absolute top-2 right-4 text-2xl text-gray-400 hover:text-gray-700">&times;</button>
         
         <div className="flex flex-col gap-6">
@@ -245,14 +245,46 @@ function UserDetailModal({ user, onClose, onUserUpdate }) {
 function UsersDataComponent() {
     const [showDropdown, setShowDropdown] = useState(null);
     const [users, setUsers] = useState([]); // State to hold user data
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [userToDelete, setUserToDelete] = useState(null);
     const [showDeletePopover, setShowDeletePopover] = useState(null); // index of row for popover
     const [viewUser, setViewUser] = useState(null); // user to view in modal
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef();
 
     useEffect(()=>{
         fetchUsers();
     },[])
+
+    // Filter users based on status and search term
+    useEffect(() => {
+        let filtered = [...users];
+
+        // Filter by search term
+        if (searchTerm) {
+            filtered = filtered.filter(user =>
+                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user._id.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Filter by verification status
+        if (filterStatus !== 'all') {
+            if (filterStatus === 'verified') {
+                filtered = filtered.filter(user => user.isVerified);
+            } else if (filterStatus === 'unverified') {
+                filtered = filtered.filter(user => !user.isVerified);
+            } else if (filterStatus === 'host') {
+                filtered = filtered.filter(user => user.userType === 'host');
+            } else if (filterStatus === 'customer') {
+                filtered = filtered.filter(user => user.userType === 'customer');
+            }
+        }
+
+        setFilteredUsers(filtered);
+    }, [users, filterStatus, searchTerm]);
 
     const fetchUsers = () => {
         axios.get(getApiUrl("api/fetch/users"))
@@ -317,23 +349,179 @@ function UsersDataComponent() {
     };
 
   return (
-    <div className="overflow-x-auto">
-        <table className='w-full'>
-            <thead>
-         <tr className="text-left text-sm font-medium text-gray-500 border-b">
-            <th className="pb-3 px-4">Profile</th>
-            <th className="pb-3 px-4">User Id</th>
-            <th className="pb-3 px-4">Name</th>
-            <th className="pb-3 px-4">Email</th>
-            <th className="pb-3 px-4">User type</th>
-            <th className="pb-3 px-4">Verification</th>
-            <th className="pb-3 px-4">License Status</th>
-            <th className="pb-3 px-4">Created At</th>
-            <th className="pb-3 px-4">Action</th>
-          </tr>
-            </thead>
-            <tbody>
-              {users.map((user,index)=>{
+    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white shadow-2xl">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+              Users Management
+            </h1>
+            <p className="text-blue-100 text-lg">Manage and verify platform users</p>
+          </div>
+          <button
+            onClick={fetchUsers}
+            className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 border border-white/20 shadow-lg hover:shadow-xl"
+          >
+            <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh Data
+          </button>
+        </div>
+      </div>
+
+      {/* Search and Filter Section */}
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg className="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Search & Filter Users
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name, email, or user ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
+            />
+            <svg className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none cursor-pointer"
+          >
+            <option value="all">All Users</option>
+            <option value="verified">✅ Verified</option>
+            <option value="unverified">❌ Unverified</option>
+            <option value="host">🏠 Hosts</option>
+            <option value="customer">👤 Customers</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <button
+          onClick={() => setFilterStatus('all')}
+          className={`bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-4 focus:ring-white/50 ${
+            filterStatus === 'all' ? 'ring-4 ring-white/70 scale-105' : ''
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold mb-1">{users.length}</div>
+              <div className="text-sm opacity-90">Total Users</div>
+            </div>
+            <svg className="text-2xl opacity-80 w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+            </svg>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setFilterStatus('verified')}
+          className={`bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-4 focus:ring-white/50 ${
+            filterStatus === 'verified' ? 'ring-4 ring-white/70 scale-105' : ''
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold mb-1">{users.filter(u => u.isVerified).length}</div>
+              <div className="text-sm opacity-90">Verified</div>
+            </div>
+            <svg className="text-2xl opacity-80 w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+            </svg>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setFilterStatus('unverified')}
+          className={`bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-4 focus:ring-white/50 ${
+            filterStatus === 'unverified' ? 'ring-4 ring-white/70 scale-105' : ''
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold mb-1">{users.filter(u => !u.isVerified).length}</div>
+              <div className="text-sm opacity-90">Unverified</div>
+            </div>
+            <svg className="text-2xl opacity-80 w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd"/>
+            </svg>
+          </div>
+        </button>
+        
+        <button
+          onClick={() => setFilterStatus('host')}
+          className={`bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer focus:outline-none focus:ring-4 focus:ring-white/50 ${
+            filterStatus === 'host' ? 'ring-4 ring-white/70 scale-105' : ''
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold mb-1">{users.filter(u => u.userType === 'host').length}</div>
+              <div className="text-sm opacity-90">Hosts</div>
+            </div>
+            <svg className="text-2xl opacity-80 w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+          </div>
+        </button>
+        
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold mb-1">{filteredUsers.length}</div>
+              <div className="text-sm opacity-90">Filtered</div>
+            </div>
+            <svg className="text-2xl opacity-80 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto hide-scrollbar">
+          <table className='w-full'>
+              <thead>
+           <tr className="text-left text-sm font-medium text-gray-500 border-b bg-gray-50">
+              <th className="pb-3 px-4 py-4">Profile</th>
+              <th className="pb-3 px-4 py-4">User Id</th>
+              <th className="pb-3 px-4 py-4">Name</th>
+              <th className="pb-3 px-4 py-4">Email</th>
+              <th className="pb-3 px-4 py-4">User type</th>
+              <th className="pb-3 px-4 py-4">Verification</th>
+              <th className="pb-3 px-4 py-4">License Status</th>
+              <th className="pb-3 px-4 py-4">Created At</th>
+              <th className="pb-3 px-4 py-4">Action</th>
+            </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="py-12 text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">No users found</h3>
+                      <p className="text-gray-500">No users match your current search criteria.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user,index)=>{
                 const defaultProfileImg = "https://imgs.search.brave.com/XfEYZ8GiGdxGCdS_JsblVMJV7ufqdKMwU1a9uPFGtjg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nYWxsLmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvNS9Qcm9m/aWxlLVBORy1GcmVl/LUltYWdlLnBuZw";
                 
                 const getImageUrl = (imgUrl) => {
@@ -421,9 +609,22 @@ function UsersDataComponent() {
             </td>
                 </tr>
                 );
-              })}
+              })
+                )}
             </tbody>
-        </table>
+          </table>
+        </div>
+      </div>
+      
+      {/* Results Summary */}
+      {filteredUsers.length > 0 && (
+        <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-gray-100">
+          <p className="text-gray-600">
+            Showing <span className="font-bold text-indigo-600">{filteredUsers.length}</span> of <span className="font-bold text-indigo-600">{users.length}</span> users
+          </p>
+        </div>
+      )}
+      
       {viewUser && <UserDetailModal user={viewUser} onClose={() => setViewUser(null)} onUserUpdate={fetchUsers} />}
     </div>
   )

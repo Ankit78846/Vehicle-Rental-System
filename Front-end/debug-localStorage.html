@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LocalStorage Debug</title>
+</head>
+<body>
+    <h1>LocalStorage Debug for Profile Image</h1>
+    <button onclick="checkLocalStorage()">Check localStorage</button>
+    <button onclick="testImageLoad()">Test Image Load</button>
+    <button onclick="clearProfileImg()">Clear Profile Image</button>
+    <button onclick="setTestImage()">Set Test Image</button>
+    
+    <div id="output"></div>
+    <div id="imageTest"></div>
+
+    <script>
+        function checkLocalStorage() {
+            const output = document.getElementById('output');
+            const profileImg = localStorage.getItem('profileImg');
+            
+            output.innerHTML = `
+                <h3>LocalStorage Contents:</h3>
+                <p><strong>profileImg:</strong> ${profileImg}</p>
+                <p><strong>token:</strong> ${localStorage.getItem('token')}</p>
+                <p><strong>name:</strong> ${localStorage.getItem('name')}</p>
+                <p><strong>email:</strong> ${localStorage.getItem('email')}</p>
+                <h3>Profile Image Analysis:</h3>
+                <p><strong>Is empty/null:</strong> ${!profileImg || profileImg.trim() === ''}</p>
+                <p><strong>Starts with http:</strong> ${profileImg && profileImg.startsWith('http')}</p>
+                <p><strong>Length:</strong> ${profileImg ? profileImg.length : 0}</p>
+                <p><strong>Processed URL would be:</strong> ${profileImg ? (profileImg.startsWith('http') ? profileImg : `http://localhost:3001/uploads/profiles/${profileImg}`) : 'No URL'}</p>
+            `;
+        }
+
+        function testImageLoad() {
+            const profileImg = localStorage.getItem('profileImg');
+            const imageTest = document.getElementById('imageTest');
+            
+            if (profileImg) {
+                const processedUrl = profileImg.startsWith('http') 
+                    ? profileImg 
+                    : `http://localhost:3001/uploads/profiles/${profileImg}`;
+                
+                imageTest.innerHTML = `
+                    <h3>Image Load Test:</h3>
+                    <p><strong>URL:</strong> ${processedUrl}</p>
+                    <img src="${processedUrl}" 
+                         onload="console.log('Image loaded successfully')" 
+                         onerror="console.log('Image failed to load')" 
+                         style="width:100px;height:100px;border:1px solid #ccc;" />
+                `;
+            } else {
+                imageTest.innerHTML = '<p>No profile image in localStorage</p>';
+            }
+        }
+
+        function clearProfileImg() {
+            localStorage.removeItem('profileImg');
+            alert('Profile image cleared from localStorage');
+        }
+
+        function setTestImage() {
+            localStorage.setItem('profileImg', 'http://localhost:3001/uploads/profiles/1753101138567.png');
+            alert('Test image set in localStorage');
+        }
+
+        // Auto-run on page load
+        window.onload = function() {
+            checkLocalStorage();
+            testImageLoad();
+        }
+    </script>
+</body>
+</html>

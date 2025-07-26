@@ -6,6 +6,7 @@ import { FaPen, FaSpinner } from "react-icons/fa";
 import toast,{ Toaster } from "react-hot-toast";
 import { getApiUrl, getImageUrl as getVehicleImageUrl } from "../config/api";
 import BackButton from "../components/BackButton";
+import SimilarVehiclesRecommendation from "../components/SimilarVehiclesRecommendation";
 
 
 function VehicleDetails() {
@@ -28,6 +29,8 @@ function VehicleDetails() {
 
   useEffect(() => {
     const fetchVehicleData = async () => {
+      setLoading(true); // Set loading to true at the start of each fetch
+      
       // Always fetch complete data from backend to ensure we have all vehicle specifications
       if (id) {
         try {
@@ -60,11 +63,8 @@ function VehicleDetails() {
       setLoading(false);
     };
 
-    // Only fetch if we're still loading
-    if (loading) {
-      fetchVehicleData();
-    }
-  }, [id, loading, location.state]); // Removed vehicleData from dependencies to prevent infinite loop
+    fetchVehicleData(); // Always call fetchVehicleData when dependencies change
+  }, [id, location.state]); // Removed loading from dependencies
 
   // Function to handle continue to payment
   const handleContinueToPayment = () => {
@@ -117,11 +117,17 @@ function VehicleDetails() {
       state: {
         bookingData: bookingData,
         vehicleData: {
+          ...vehicleData, // Pass all vehicle data
           name: vehicleData?.name,
           price: vehicleData?.price,
           image: vehicleData?.image,
           id: vehicleData?._id || vehicleData?.id,
-          dateRange: vehicleData?.dateRange
+          _id: vehicleData?._id || vehicleData?.id, // Ensure both id formats are available
+          dateRange: vehicleData?.dateRange,
+          type: vehicleData?.type,
+          brand: vehicleData?.brand,
+          location: vehicleData?.location,
+          capacity: vehicleData?.capacity
         },
         totalPrice: `रु${totalPrice.toLocaleString()}`,
         originalPrice: typeof vehicleData?.price === 'string' ? vehicleData.price : `रु${basePrice.toLocaleString()}`,
@@ -146,24 +152,8 @@ function VehicleDetails() {
     );
   }
 
-  // Function to construct proper image URL
-  const getImageUrl = (imagePath) => {
-    if (!imagePath || imageError) {
-      console.log("No image path provided or image error occurred");
-      return "/placeholder-vehicle.jpg";
-    }
-
-    // If it's already a full URL
-    if (imagePath.startsWith('http')) {
-      console.log("Using full URL:", imagePath);
-      return imagePath;
-    }
-
-    // Use the centralized image URL helper
-    return getVehicleImageUrl(imagePath);
-  };
-
-  const imageUrl = getVehicleImageUrl(vehicleData?.image);
+  // Use imageError state to provide fallback image
+  const imageUrl = imageError ? "/placeholder-vehicle.jpg" : getVehicleImageUrl(vehicleData?.image);
 
   console.log("Vehicle image field:", vehicleData?.image);
   console.log("Final constructed image URL:", imageUrl);
@@ -220,6 +210,11 @@ function VehicleDetails() {
             <div className="lg:col-span-3 row-span-3 order-3 lg:order-3">
               <VehicleFeatures features={vehicleData.features || features} />
             </div>
+          </div>
+
+          {/* Similar Vehicles Recommendation */}
+          <div className="mt-12">
+            <SimilarVehiclesRecommendation currentVehicle={vehicleData} limit={4} />
           </div>
         </div>
       </div>

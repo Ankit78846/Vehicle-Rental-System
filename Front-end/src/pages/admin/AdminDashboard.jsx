@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UsersDataComponent from "./DashboardComponent/UsersDataComponent.jsx";
 import VehicleDataComponent from './DashboardComponent/VehicleDataComponent.jsx';
+import BookingDataComponent from './DashboardComponent/BookingDataComponent.jsx';
+import CancelRequestsComponent from './DashboardComponent/CancelRequestsComponent.jsx';
 import AddVehicleForm from '../renter/AddVehicleForm.jsx';
 import EditVehicleForm from './DashboardComponent/EditVehiclePage.jsx'; // Reusable Add/Edit form
+import VehicleAnalyticsDashboard from '../../components/VehicleAnalyticsDashboard.jsx';
 
 const Sidebar = ({ selectedMenu, setSelectedMenu }) => {
   const menuItems = [
     { id: 'vehicles', name: 'Vehicle Listing' },
     { id: 'users', name: 'Users' },
+    { id: 'analytics', name: 'Analytics' },
     { id: 'add-vehicle', name: 'Add Vehicle' },
-    {id: "vehicle-booking", name:"Vehicle Booking"},
+    { id: "vehicle-booking", name:"Vehicle Booking"},
+    { id: "cancel-requests", name:"Cancel Requests"},
   ];
 
   return (
@@ -36,12 +41,8 @@ const Sidebar = ({ selectedMenu, setSelectedMenu }) => {
 };
 
 const VehicleListing = () => (
-  <div className="p-6">
-    <h2 className="text-2xl font-bold mb-4">Vehicle Listing</h2>
-    <div className="bg-white p-4 rounded-lg shadow">
-          <VehicleDataComponent/>
-
-    </div>
+  <div>
+    <VehicleDataComponent/>
   </div>
 );
 
@@ -57,6 +58,12 @@ const Users = () => (
   </div>
 );
 
+const Analytics = () => (
+  <div className="p-6">
+    <VehicleAnalyticsDashboard />
+  </div>
+);
+
 const AddVehicle = () => (
   <div className="p-6">
     <h2 className="text-2xl font-bold mb-4">Add Vehicle</h2>
@@ -64,6 +71,21 @@ const AddVehicle = () => (
      {/* <AddVehicleForm /> */}
      <EditVehicleForm />
     </div>
+  </div>
+);
+
+const VehicleBooking = () => (
+  <div className="p-6">
+    <h2 className="text-2xl font-bold mb-4">Vehicle Bookings</h2>
+    <div className="bg-white p-4 rounded-lg shadow">
+      <BookingDataComponent />
+    </div>
+  </div>
+);
+
+const CancelRequests = () => (
+  <div className="p-6">
+    <CancelRequestsComponent />
   </div>
 );
 
@@ -85,8 +107,14 @@ const AdminDashboard = () => {
         return <VehicleListing  />;
       case 'users':
         return <Users />;
+      case 'analytics':
+        return <Analytics />;
       case 'add-vehicle':
         return <AddVehicle  />;
+      case 'vehicle-booking':
+        return <VehicleBooking />;
+      case 'cancel-requests':
+        return <CancelRequests />;
       default:
         return <VehicleListing  />;
     }
